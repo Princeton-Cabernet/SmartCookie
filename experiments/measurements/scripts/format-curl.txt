@@ -1,0 +1,13 @@
+{\n
+"time_redirect": %{time_redirect},\n
+"time_namelookup": %{time_namelookup},\n
+"time_connect": %{time_connect},\n
+"time_appconnect": %{time_appconnect},\n
+"time_pretransfer": %{time_pretransfer},\n
+"time_starttransfer": %{time_starttransfer},\n
+"time_total": %{time_total},\n
+"size_request": %{size_request},\n
+"size_upload": %{size_upload},\n
+"size_download": %{size_download},\n
+"size_header": %{size_header}\n
+}\n
