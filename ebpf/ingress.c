@@ -25,7 +25,7 @@
 #include <linux/ipv6.h>
 #include <uapi/linux/tcp.h>
 #include <uapi/linux/udp.h>
-#include <smartcookie.h>
+#include <include/smartcookie.h>
 
 //time event 2^16 ns
 #define COOKIE_PERIOD 4096

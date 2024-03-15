@@ -34,7 +34,7 @@
 #include <uapi/linux/udp.h>
 #include <linux/if_ether.h>
 #include <linux/pkt_cls.h>
-#include <smartcookie.h>
+#include <include/smartcookie.h>
 
 struct pkt_ippair {
   __be32 src_ip;
