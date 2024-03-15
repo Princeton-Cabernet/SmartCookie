@@ -20,8 +20,8 @@
 #include <tna.p4>
 
 // Testbed parameters
-const bit<9> SERVER_PORT=128; 
-const bit<32> SERVER_IP=0x80000006;//128.0.0.6
+const bit<9> SERVER_PORT=131; 
+const bit<32> SERVER_IP=0x83000006;//131.0.0.6
 
 typedef bit<48> mac_addr_t;
 typedef bit<32> ipv4_addr_t;
