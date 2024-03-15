@@ -16,7 +16,7 @@ import (
 
 func rndAddr() (string) {
     //return fmt.Sprintf("169.254.0.1:%d",1025+rand.Intn(65533-1024))
-    return fmt.Sprintf("130.0.%d.%d:%d",rand.Intn(254),rand.Intn(254),1024+rand.Intn(60000))
+    return fmt.Sprintf("129.0.%d.%d:%d",rand.Intn(254),rand.Intn(254),1024+rand.Intn(60000))
 }
 
 func http_client_use_addr(addr string) (*http.Client) {
@@ -56,7 +56,7 @@ func http_get(addr string, url string) (int,error){
 }
 
 func get_url_from_size(size int) string{
-    return fmt.Sprintf("http://128.0.0.6:8090/%d",size)
+    return fmt.Sprintf("http://131.0.0.6:8090/%d",size)
 }
 
 
