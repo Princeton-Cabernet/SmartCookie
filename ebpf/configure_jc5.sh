@@ -2,7 +2,7 @@
 
 # Network interface configuration
 INTERFACE="enp3s0f1"
-IP_ADDRESS="128.0.0.5"
+IP_ADDRESS="130.0.0.5"
 HW_ADDRESS="00:00:00:00:00:82"
 GATEWAY="1.0.0.1"
 ARP_ADDRESS="00:00:00:00:00:01"
