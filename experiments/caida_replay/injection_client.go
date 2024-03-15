@@ -19,7 +19,7 @@ import (
     "golang.org/x/sys/unix"
 )
 var remote_port string = "8090"
-var server_dpid string = "128"
+var server_dpid string = "131"
 
 func check(e error) {
     if e != nil {
@@ -29,7 +29,7 @@ func check(e error) {
 func getAddr(addr_a string, addr_b string, local_port string) (string) {
      //_ = rand.Intn(1)
 	//without randomized src port 
-	return fmt.Sprintf("130.0."+addr_a+"."+addr_b+":"+local_port)
+	return fmt.Sprintf("129.0."+addr_a+"."+addr_b+":"+local_port)
 
      //return fmt.Sprintf("130.0.%d.%d:%d",rand.Intn(255),rand.Intn(255),1024+rand.Intn(65535-1024))
     //return fmt.Sprintf("130.%d.%d.%d:%d",rand.Intn(254),rand.Intn(254),rand.Intn(254),10000+rand.Intn(10000))
