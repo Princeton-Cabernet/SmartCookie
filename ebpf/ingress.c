@@ -133,7 +133,7 @@ static uint32_t get_hash(uint32_t src, uint32_t dst, uint16_t src_port, uint16_t
 }
 
 int xdp_ingress(struct xdp_md *ctx) {
-//    if(DEBUG)bpf_trace_printk("ENTERING INGRESS!"); 	
+    //if(DEBUG)bpf_trace_printk("ENTERING INGRESS!"); 	
     long *value;
     uint16_t h_proto;
     uint64_t nh_off = 0;
@@ -335,7 +335,7 @@ int xdp_ingress(struct xdp_md *ctx) {
             pkt.dst_port = udp->dest;
   //          if(DEBUG)bpf_trace_printk("XDP_INGRESS: packet is UDP: src_ip 0x%x, dst_ip 0x%x", pkt.src_ip, pkt.dst_ip);
         }
-    
+
     return rc; 
    
 	DROP:

@@ -17,8 +17,7 @@
 */
 
 #define PIN_GLOBAL_NS 2 
-//#define IFINDEX 2 
-#define IFINDEX 8
+#define IFINDEX 3 
 #define TS_UDP_PORT 5555
 #define IP_CSUM_OFF offsetof(struct iphdr, check) 
 #define IP_TOTLEN_OFF offsetof(struct iphdr, tot_len) 
