@@ -1,7 +1,7 @@
 #!/bin/bash
 
 time="0.5" 	# time in seconds
-int="enp5s0f0"   # network interface
+int="enp3s0f1"   # network interface
 dirname=b_rps_${1?Error: enter directory name to save files in}
 iter=20
 
