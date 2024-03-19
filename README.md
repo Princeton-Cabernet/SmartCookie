@@ -79,7 +79,7 @@ We next describe the setup and configuration steps to launch SMARTCOOKIE and pre
 ### 3.1 Compiling and launching the Switch Agent (Terminal 1) 
 * First, open a new terminal window and SSH into the switch `ssh jc-tofino`.
 * Clone the SMARTCOOKIE artifact repo and `cd SmartCookie-Artifact/p4src`.
-* Run the `./switchagent_compile.sh` script to compile the program. This may take a few seconds, and you will see some warnings, but these can safely be ignored.
+* Run the `./switchagent_compile.sh` script to compile the program. This may take a few seconds, and you will see some warnings, but these can safely be ignored. Note this step only needs to be done once, unless there are changes made to the program. 
 * Once the compilation is complete, run `./switchagent_load.sh` to load the `SMARTCOOKIE-HalfSipHash.p4` program onto the switch. A successful load should output `bfruntime gRPC server started` as the last log line and land on the switch driver shell starting with `bfshell>`.
 * Keep this terminal open while running experiments, and open other terminals for other operations.
 * If, for any reason you need to restart the switch driver, run `sudo killall bf_switchd` first, then run `./switchagent_load.sh` to reload the program again.
@@ -153,7 +153,7 @@ There are three main experiments that showcase the key results and major claims 
 Use DPDK to send spoofed attack packets to the server while increasing sending rates, and observe the response packet rates untl loss is observed on the switch (for SC-AES and SC-AES) or server (for K-SH and XDP-HSH). (As noted in the paper, since our benchmarks perform one hash calculation per SYN packet, we effectively measure maximum hashing throughput.) The Tx (response) rates should exactly match Rx (received) rates for as long as SMARTCOOKIE or the benchmark is handling the attack without any packet loss. Once a defense begins to reach its capacity, the Tx rate will begin to dip below Rx rates. 
 
 Each of the defense benchmarks have slightly different setup and attack steps, which are described next. 
-Note that the workflow for each experiment benchmark must be run separately, but instructions are grouped together below for some experiments, since many steps overlap.
+**Note that the workflow for each experiment benchmark MUST BE RUN SEPARATELY, but instructions are grouped together below for some experiments, since many steps overlap.**
 
 ### Experiment 1A and 1B: SC-HSH and SC-AES 
 
@@ -163,12 +163,12 @@ Note that the workflow for each experiment benchmark must be run separately, but
 **Initial Preparation for Experiment 1B:** 
 * For SC-AES, launch the AES variant of the switch agent by following the workflow described in `3.1`, with the exception of these different steps:
 	* `cd /p4src/benchmark` (_instead_ of `cd /p4src`).
-   	* Run the `./aes_switchagent_compile.sh` script to compile the program (_instead_ of `./switchagent_compile.sh`).
+   	* Run the `./aes_switchagent_compile.sh` script to compile the program (_instead_ of `./switchagent_compile.sh`). Note this step only needs to be done once, unless there are changes made to the program. 
    	* Once the compilation is complete, run `./aes_switchagent_load.sh` to load the `SMARTCOOKIE-AES.p4` program onto the switch (_instead_ of `./switchagent_load.sh`).
    	* Follow the remainder of the steps in `3.1` (e.g., initializing ports). 
 * Then, run the controller script to load an arbitrary encryption key (this is required to set up recirculation rounds correctly): `python3 SmartCookie-AES-controller/install_key.py 0x000102030405060708090a0b0c0d0e0f`. The script may take a few seconds to a minute to install the key. 
 
-**Preparation for both Experiment 1A and 1B:**
+**Attack Preparation for both Experiment 1A and 1B:**
 * In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
 * For each attack terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
 * If the server has been rebooted recently, reconfigure the huge pages: `cd /home/shared/dpdk/usertools` and run `./dpdk-setup.sh`. 
@@ -248,13 +248,117 @@ Note that the workflow for each experiment benchmark must be run separately, but
 * The commands `start 0` and `start 1` begin the attack, and you should see `pktgen`'s continuous Rx/Tx rates in the `Pktgen:/>` consoles. (Note: If the console displays ever get messy, `page main` will reset the display.)
 * In the switch agent's `bf-sde.pm>` console, the command `rate-show` will also show Rx/Tx rates of the attack on the switch (ports `3/0`, `5/0`, and `6/0`). #### FIX ME!  
 
-**Results:**
-* To verify the maximum attack rate that SC-HSH and SC-AES can handle before any packet loss, increase the sending attack rate with `set 0 rate X` and `set 1 rate X`, with a maximum `X` of 100. As long as the Rx/Tx rates match in the switch agent, the switch agent is successfully defending against the SYN flood attack packets without any packet loss. SC-HSH can accomplish this up until rates of 136 Mpps, while SC-AES can only achieve 52 Mpps.
-	* For SC-HSH:
-   	* For SC-AES: 
+**Results for both Experiment 1A and 1B:**
+* To observe the maximum attack rate that SC-HSH and SC-AES can handle before any packet loss, you can play around with increasing the sending attack rate with commands `set 0 rate X` and `set 1 rate X`, with a maximum `X` of 100. As long as the Rx/Tx rates observed with `rate-show` in the switch agent match each other, the switch agent is successfully defending against the SYN flood attack packets without any packet loss.
+* SC-HSH can accomplish this up until rates of ~136 Mpps, while SC-AES can only achieve ~52 Mpps.
+* To verify these maximum rates directly, use the following attack rates: 
+	* Turn off attack traffic from both `opti1` and `opti2` with `stop 0`.
+   	* Max out the sending rates on both ports on `jc4` with `set 0 rate 100` and `set 1 rate 100`. Using `rate-show` in the switch console, you should see the combined Tx (response) rate from both ports matches the combined Rx (received) rate at ~37.8 Mpps. 
+   	* For SC-AES: Turn on the attack from `opti1` with `set 0 rate 1` and `start 0`. Refresh the switch counters (`rate-show`), and confirm the Rx/Tx rates still match (it should be ~39 Mpps). Try inching the attack rate up on `opti1` with `set 0 rate 5`, and observe that at ~45 Mpps total attack rates the loss on the switch remains 0 (or very close to it). Increase the attack rate to ~52 Mpps with `set 0 rate 10` on `opti1`, and observe some now-consistent loss on the Tx rate of the switch (although it should still be a relatively low loss rate). Finally, increase the attack rate to ~59 Mpps with `set 0 rate 15` on `opti1`, and observe that the Tx rate on the switch has now dropped consistently and significantly below the Rx rate (the Tx should be about ~53 Mpps), showing that SC-AES has exhausted its maximum defense capacity. To see this effect magnified, increase the attack rate to 80 Mpps with `set 0 rate 100` on `opti1`, and observe that the response rate drops to ~41 Mpps, compared to the ~80 Mpps attack rate. At this point, the defense is effectively dropping 50% of the traffic it receives without being able to process it.  
+  	* For SC-HSH: Directly max out the sending rate from `opti1` with `set 0 rate 100` (with `jc4` attack continuing as well). You should see that even under an ~80 Mpps attack, the SMARTCOOKIE-HalfSipHash switch agent defends against the attack _without any packet loss_ (the Tx rate closely matching the Rx rate on the switch). SC-HSH can achieve this performance up to ~135 Mpps, but unfortunately due to the hardware limitations in our artifact testbed (which is separately operated from the testbed hardware we used in our original experiments), we can only demonstrate attack rates up to XX Mpps. 
 
 
 ### Experiment 1C and 1D: XDP-HSH and K-SH 
+
+**Initial Preparation for both Experiment 1C and 1D:** 
+* For XDP-HSH and K-SH, there is no defense running on the switch. Instead, we need to launch a supporting wire program (`synflood_assist.p4`) on the switch, which ensures attack traffic from DPDK are properly formed SYN packets before they are forwarded onto the server (where the XDP and kernel defenses operate). Follow the workflow described in `3.1`, with the exception of these different steps:
+	* `cd /p4src/benchmark` (_instead_ of `cd /p4src`).
+   	* Run the `./switch_assist_compile.sh` script to compile the program (_instead_ of `./switchagent_compile.sh`). Note this step only needs to be done once, unless there are changes made to the program. 
+   	* Once the compilation is complete, run `./switch_assist_load.sh` to load the `synflood_assist.p4` program onto the switch (_instead_ of `./switchagent_load.sh`).
+   	* Follow the remainder of the steps in `3.1` (e.g., initializing ports).
+* For XDP-HSH, we also need to bring up benchmark defense code on the server: 
+	* SSH into the server with `ssh jc6` and `cd SmartCookie-Artifact/ebpf/benchmark`.
+   	* Run `sudo python3 xdp_cookie_load.py enp3s0f1 3` to launch the XDP cookie defense. (The final argument specifies the IFINDEX which is associated with the interface, and can be found with `ip a`.)
+* For both XDP-HSH and K-SH, MEASUREMENT 
+
+**Attack Preparation for both Experiment 1C and 1D (same as for 1A and 1B):**
+* In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
+* For each attack terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
+* If the server has been rebooted recently, reconfigure the huge pages: `cd /home/shared/dpdk/usertools` and run `./dpdk-setup.sh`. 
+  	* On `opti1` and `opti2`, we have non-NUMA systems, so choose the option to setup hugepage mappings for non-NUMA systems [5]. Meanwhile, for `jc4`, choose the option for NUMA systems [52].
+  	* Enter 8192 pages per node.
+  	* Exit the script and return to the above steps to launch pktgen. 
+
+**Execution for both Experiment 1C and 1D:** 
+* From within the `Pktgen:/>` console of each of the attack machines, launch the attack against the `jc6` server, using the following commands (**NOTE:** we are generating spoofed UDP packets here, which the `synflood_assist.p4` program on the switch converts to properly formed SYN packets before sending to the server, as generating properly formed SYN packets was less convenient to do directly using `pktgen`).
+* On attack server `opti1`, copy-paste the following comands:
+   	```
+    	set 0 type ipv4
+	set 0 count 0
+	set 0 burst 10000
+	set 0 rate 0.01
+	enable 0 range 
+	range 0 proto udp
+	range 0 size 64 64 64 0 
+	range 0 src mac 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:00
+	range 0 dst mac 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:00
+	range 0 src ip 144.0.0.7 144.0.0.7 144.0.255.255 0.0.0.1
+	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
+	range 0 dst port 8090 8090 8090 0
+	start 0
+	```
+* On attack server `opti2`, copy-paste the following comands:
+   	```
+    	set 0 type ipv4
+	set 0 count 0
+	set 0 burst 10000
+	set 0 rate 0.01
+	enable 0 range 
+	range 0 proto udp
+	range 0 size 64 64 64 0 
+	range 0 src mac 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:00
+	range 0 dst mac 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:00
+	range 0 src ip 144.0.0.7 144.0.0.7 144.0.255.255 0.0.0.1
+	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
+	range 0 dst port 8090 8090 8090 0
+	start 0
+	```
+* On attack server `jc4`, copy-paste the following comands: 
+   	```
+    	set 0 type ipv4
+	set 0 count 0
+	set 0 burst 10000
+	set 0 rate 0.01
+	enable 0 range 
+	range 0 proto udp
+	range 0 size 64 64 64 0 
+	range 0 src mac 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:00
+	range 0 dst mac 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:00
+	range 0 src ip 144.0.0.7 144.0.0.7 144.0.255.255 0.0.0.1
+	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
+	range 0 dst port 8090 8090 8090 0
+	start 0
+	
+      	set 1 type ipv4
+	set 1 count 0
+	set 1 burst 10000
+	set 1 rate 0.01
+	enable 1 range 
+	range 1 proto udp
+	range 1 size 64 64 64 0 
+	range 1 src mac 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:90 00:00:00:00:00:00
+	range 1 dst mac 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:83 00:00:00:00:00:00
+	range 1 src ip 144.0.0.7 144.0.0.7 144.0.255.255 0.0.0.1
+	range 1 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
+	range 1 dst port 8090 8090 8090 0
+	start 1
+	
+	start 0
+	start 1   
+	```
+* The commands `start 0` and `start 1` begin the attack, and you should see `pktgen`'s continuous Rx/Tx rates in the `Pktgen:/>` consoles. (Note: If the console displays ever get messy, `page main` will reset the display.)
+* In the switch agent's `bf-sde.pm>` console, the command `rate-show` will also show Rx/Tx rates of the attack on the switch (ports `3/0`, `5/0`, and `6/0`). #### FIX ME!  
+
+**Results for both Experiment 1C and 1D:**
+* To observe the maximum attack rate that SC-HSH and SC-AES can handle before any packet loss, you can play around with increasing the sending attack rate with commands `set 0 rate X` and `set 1 rate X`, with a maximum `X` of 100. As long as the Rx/Tx rates observed with `rate-show` in the switch agent match each other, the switch agent is successfully defending against the SYN flood attack packets without any packet loss.
+* SC-HSH can accomplish this up until rates of ~136 Mpps, while SC-AES can only achieve ~52 Mpps.
+* To verify these maximum rates directly, use the following attack rates: 
+	* Turn off attack traffic from both `opti1` and `opti2` with `stop 0`.
+   	* Max out the sending rates on both ports on `jc4` with `set 0 rate 100` and `set 1 rate 100`. Using `rate-show` in the switch console, you should see the combined Tx (response) rate from both ports matches the combined Rx (received) rate at ~37.8 Mpps. 
+   	* For SC-AES: Turn on the attack from `opti1` with `set 0 rate 1` and `start 0`. Refresh the switch counters (`rate-show`), and confirm the Rx/Tx rates still match (it should be ~39 Mpps). Try inching the attack rate up on `opti1` with `set 0 rate 5`, and observe that at ~45 Mpps total attack rates the loss on the switch remains 0 (or very close to it). Increase the attack rate to ~52 Mpps with `set 0 rate 10` on `opti1`, and observe some now-consistent loss on the Tx rate of the switch (although it should still be a relatively low loss rate). Finally, increase the attack rate to ~59 Mpps with `set 0 rate 15` on `opti1`, and observe that the Tx rate on the switch has now dropped consistently and significantly below the Rx rate (the Tx should be about ~53 Mpps), showing that SC-AES has exhausted its maximum defense capacity. To see this effect magnified, increase the attack rate to 80 Mpps with `set 0 rate 100` on `opti1`, and observe that the response rate drops to ~41 Mpps, compared to the ~80 Mpps attack rate. At this point, the defense is effectively dropping 50% of the traffic it receives without being able to process it.  
+  	* For SC-HSH: Directly max out the sending rate from `opti1` with `set 0 rate 100` (with `jc4` attack continuing as well). You should see that even under an ~80 Mpps attack, the SMARTCOOKIE-HalfSipHash switch agent defends against the attack _without any packet loss_ (the Tx rate closely matching the Rx rate on the switch). SC-HSH can achieve this performance up to ~135 Mpps, but unfortunately due to the hardware limitations in our artifact testbed (which is separately operated from the testbed hardware we used in our original experiments), we can only demonstrate attack rates up to XX Mpps. 
+
+
 
 ## 4.2 Experiment 2 - Latency (Estimate: 20 human-minutes)
 
