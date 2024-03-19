@@ -2,7 +2,7 @@
 
 This repository contains the prototype source code and instructions for artifact evaluation for our USENIX Security'24 paper [SMARTCOOKIE: Blocking Large-Scale SYN Floods with a Split-Proxy Defense on Programmable Data Planes](#).
 
-## Contents
+## 1. Contents
 The artifact consists of two major pieces: 1) source code for the switch agent and server agent of SMARTCOOKIE's split-proxy SYN-flooding defense, related benchmark code, and measurement scripts (showing availability), and 2) a hardware testbed for running and evaluating SMARTCOOKIE under key attack scenarios (showing functionality and reproducibility). 
 * `p4src/` includes the Switch Agent program that calculates SYN cookies using HalfSipHash.
 	* `p4src/benchmark/` contains variants of the Switch Agent, for benchmarking max hashing rate using a different hash function (AES).
@@ -11,17 +11,17 @@ The artifact consists of two major pieces: 1) source code for the switch agent a
 * `experiments/` includes the relevant scripts for running key experiments.
 	* `experiments/measurements/` contains scripts for collecting client-side latency and server-side CPU measurements.
 
-## Description & Requirements
+## 2. Description & Requirements
 For the purposes of this artifact evaluation, our testbed consists of five servers and an Intel Tofino Wedge32X-BF programmable switch.
 Three machines act as adversaries, each with a XX-core Intel Xeon Silver 4114 CPU and a Mellanox ConnectX-5 2x100Gbps NIC, generating attack traffic using DPDK 19.12.0 and pktgen-DPDK.
 Two other machines act as server and client, each with 8-core Intel Xeon D-1541 CPUs and Intel X552 2x10Gbps NICs. 
 **For simplicity of artifact evaluation, we are providing evaluators with access to our preconfigured testbed (access instructions below). Instructions for installations and dependencies are briefly included for completeness, but all installations and dependencies are already in place for the evaluation testbed.** 
 Next, we describe how to access the testbed, what hardware and software dependencies are required (these are preconfigured for the testbed), and what additional benchmarks can be run. 
 
-### Security, privacy, and ethical concerns
+### 2.1 Security, privacy, and ethical concerns
 There are no security, privacy, or ethical concerns or risks to evaluators or their machines. All experiments can be run on the authors’ testbed, which is provisioned for the planned attack rates. For testbed access, please do not share or distribute the private key (discussed further below).
 
-### Accessing the testbed 
+### 2.2 Accessing the testbed 
 * Save the SSH private access key (shared with you directly on the submission site) to your local machine under `~/.ssh/usenixsec24ae.priv.id_rsa`. Note your `sudo` password was also shared with you on the submission site. 
 * Update the permissions with `chmod 600 ~/.ssh/usenixsec24ae.priv.id_rsa`. 
 * Start the ssh-agent and load the key: `eval $(ssh-agent -s)` and `ssh-add ~/.ssh/usenixsec24ae.priv.id_rsa`.
@@ -62,21 +62,21 @@ There are no security, privacy, or ethical concerns or risks to evaluators or th
         IdentityFile ~/.ssh/usenixsec24ae.priv.id_rsa
         ProxyJump jc-gateway
 ```
-### Hardware dependencies 
+### 2.3 Hardware dependencies 
 The switch agent requires an Intel Tofino Wedge32X-BF programmable switch. In order to stress test the switch agent and observe the full capacity of the defense, the adversarial machines must be capable of generating at least 150 Mpps of combined adversarial traffic. This can be accomplished with either two attack machines with 20 cores and 2x100Gbps links, or with three or more machines with fewer cores. 
 
-### Software dependencies (For evaluation simplicity, all software dependencies are pre-installed and configured on the artifact testbed.)
+### 2.4 Software dependencies (For evaluation simplicity, all software dependencies are pre-installed and configured on the artifact testbed.)
 * Switch Agent Prerequisite: please use `bf-sde` version 9.7.1 or newer to compile the P4 program. 
 * Server Agent Prerequisite: please use kernel `5.10` or newer and the latest version of the `bcc` toolkit. (For Ubuntu, you may run `sudo apt-get install bpfcc-tools python3-bpfcc linux-headers-$(uname -r)`)
 * Adversary Machine Prerequisite: please use `DPDK` `19.12.0` or newer and a matching `pktgen-DPDK` version.
 
-### Benchmarks 
+### 2.5 Benchmarks 
 We compare the cookie hashing performance of SMARTCOOKIE’s switch-based HalfSipHash to that of AES (on the switch) and XDP (on the server). Source code and setup instructions are under `/p4src/benchmark` and `/ebpf/benchmark/` respectively.
 
-## Usage and a Basic Test (Estimate: 15 human-minutes)
+## 3. Usage and a Basic Test (Estimate: 15 human-minutes)
 We next describe the setup and configuration steps to launch SMARTCOOKIE and prepare the testbed environment for evaluation. We also walk through a simple functionality test of the switch agent and server agent, with an end-to-end connection test between a client and server. 
 
-### Compiling and launching the Switch Agent (Terminal 1) 
+### 3.1 Compiling and launching the Switch Agent (Terminal 1) 
 * First, open a new terminal window and SSH into the switch `ssh jc-tofino`.
 * Clone the SMARTCOOKIE artifact repo and `cd SmartCookie-Artifact/p4src`.
 * Run the `./switchagent_compile.sh` script to compile the program. This may take a few seconds, and you will see some warnings, but these can safely be ignored.
@@ -117,7 +117,7 @@ This is the mapping between the servers and switch ports.
 * ATTACK SERVER 2 (): 
 * ATTACK SERVER 3 (two 40G links): Port 5/0 with DPID 160 (hex 0xA0) is linked to `jc4` port 1 and Port 6/0 with DPID 168 (hex 0xA8) is linked to `jc4` port 0. 
 
-### Launching the Server Agent (Terminal 2, 3, & 4)
+### 3.2 Launching the Server Agent (Terminal 2, 3, & 4)
 * Open three other terminal windows and access the server agent with `ssh jc6` in each window.
 * Clone the artifact repo on `jc6` if you haven't already, and `cd SmartCookie-Artifact/ebpf`.
 * Run `./configure/configure_jc6.sh` once to configure static IP addresses and ARP entries.
@@ -127,7 +127,7 @@ This is the mapping between the servers and switch ports.
 * You should see output that the programs have been loaded.
 * Finally, run the following python script to sync timestamps between the server agent and switch agent, which is necessary for cookie checks: `sudo python3 send_ts.py`. 
 
-### A Quick Functionality Test (Terminal 5 & 6) 
+### 3.3 A Quick Functionality Test (Terminal 5 & 6) 
 * To test a simple end-to-end connection between the `jc5` client and `jc6` server (protected by the intermediate switch agent and server agent), open two more terminals.
 * SSH into the client with `ssh jc5` and SSH once more into the server with `ssh jc6`.
 * On the server `jc6`, start up a `netcat` server with `nc -l -p 2020`.
@@ -136,26 +136,47 @@ This is the mapping between the servers and switch ports.
 * If you are curious, you can use `tcpdump -evvvnX -i enp3s0f1` on both client and server to view the full packet sequence during connection setup, and map it to that of Figure 4 in the paper.
 * Note that tcpdump is positioned after XDP on the _ingress_ pipeline, and after TC on the _egress_ pipeline (XDP-->tcpdump--> network stack on ingress, and network stack-->TC->tcpdump on egress).
 
-## Evaluation Workflow 
+# 4. Evaluation Workflow 
 There are three main experiments that showcase the key results and major claims of our work. These are described next. 
 
-### Major Claims 
+## 4.0 Major Claims 
 
 * C1: SMARTCOOKIE defends against attacks _without packet loss_ until rates of 136.9Mpps (which is 2.6x more than the next fastest defense). This is proven by experiment (E1), and described in Section 8.2 of the paper.
 * C2: During attacks, SMARTCOOKIE protects benign clients from performance penalties and protects servers from additional CPU usage. It adds little to no latency overhead to benign connections during attacks, and any latency is comparable to the baseline latency with no ongoing attack. Additionally, it protects the server's CPU during attacks, fully keeping the CPU resources for other applications. This is proven by experiments (E2) and (E3), and shown in Section 8.3 and 8.4 of the paper.
 
-## Experiment 1 - Hashing Throughput (Estimate: 45 human-minutes)
-**Description:** Compare the maximum hashing throughput SMARTCOOKIE-HalfSipHash (SC-HSH) can achieve _without packet loss_ to the maximum hashing throughput of the three benchmarks: Kernel-SipHash (K-SH), XDP-HalfSipHash (XDP-HSH), and SMARTCOOKIE-AES (SC-AES). Use DPDK to send spoofed attack packets to the server and observe Rx to Tx packet rates to measure loss on the switch (for SC-AES and SC-AES) or server (for K-SH and XDP-HSH). (As noted in the paper, since our benchmarks performs one hash calculation per SYN packet, we effectively measure maximum hashing throughput.) The Tx rates should exactly match Rx rates for as long as SMARTCOOKIE or the benchmark is handling the attack without any packet loss. Once the defense begins to reach its capacity, the Tx (response) rate will begin to dip below Rx (received) rates.
+## 4.1 Experiment 1 - Hashing Throughput (Estimate: 45 human-minutes)
+**Description:** Compare the maximum hashing throughput SMARTCOOKIE-HalfSipHash (SC-HSH) can achieve _without packet loss_ to the maximum hashing throughput of the three benchmarks: 
+* SMARTCOOKIE-AES (SC-AES)
+* XDP-HalfSipHash (XDP-HSH)
+* Kernel-SipHash (K-SH)
+  
+Use DPDK to send spoofed attack packets to the server while increasing sending rates, and observe the response packet rates untl loss is observed on the switch (for SC-AES and SC-AES) or server (for K-SH and XDP-HSH). (As noted in the paper, since our benchmarks perform one hash calculation per SYN packet, we effectively measure maximum hashing throughput.) The Tx (response) rates should exactly match Rx (received) rates for as long as SMARTCOOKIE or the benchmark is handling the attack without any packet loss. Once a defense begins to reach its capacity, the Tx rate will begin to dip below Rx rates. 
 
-**Preparation:** 
-* Launch the switch agent, as described above. In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
+Each of the defense benchmarks have slightly different setup and attack steps, which are described next. 
+Note that the workflow for each experiment benchmark must be run separately, but instructions are grouped together below for some experiments, since many steps overlap.
+
+### Experiment 1A and 1B: SC-HSH and SC-AES 
+
+**Initial Preparation for Experiment 1A:** 
+* For SC-HSH, launch the switch agent in `jc-tofino`, as described in `3.1` above.
+
+**Initial Preparation for Experiment 1B:** 
+* For SC-AES, launch the AES variant of the switch agent by following the workflow described in `3.1`, with the exception of these different steps:
+	* `cd /p4src/benchmark` (_instead_ of `cd /p4src`).
+   	* Run the `./aes_switchagent_compile.sh` script to compile the program (_instead_ of `./switchagent_compile.sh`).
+   	* Once the compilation is complete, run `./aes_switchagent_load.sh` to load the `SMARTCOOKIE-AES.p4` program onto the switch (_instead_ of `./switchagent_load.sh`).
+   	* Follow the remainder of the steps in `3.1` (e.g., initializing ports). 
+* Then, run the controller script to load an arbitrary encryption key (this is required to set up recirculation rounds correctly): `python3 SmartCookie-AES-controller/install_key.py 0x000102030405060708090a0b0c0d0e0f`. The script may take a few seconds to a minute to install the key. 
+
+**Preparation for both Experiment 1A and 1B:**
+* In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
 * For each attack terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
 * If the server has been rebooted recently, reconfigure the huge pages: `cd /home/shared/dpdk/usertools` and run `./dpdk-setup.sh`. 
   	* On `opti1` and `opti2`, we have non-NUMA systems, so choose the option to setup hugepage mappings for non-NUMA systems [5]. Meanwhile, for `jc4`, choose the option for NUMA systems [52].
   	* Enter 8192 pages per node.
   	* Exit the script and return to the above steps to launch pktgen. 
 
-**Execution:** 
+**Execution for both Experiment 1A and 1B:** 
 * From within the `Pktgen:/>` console of each of the attack machines, launch the SYN flood against the `jc6` server, using the following commands (which set the SYN flag 0x02 with a random mask, and spoof source IPs).
 * On attack server `opti1`, copy-paste the following comands:
    	```
@@ -228,19 +249,20 @@ There are three main experiments that showcase the key results and major claims 
 * In the switch agent's `bf-sde.pm>` console, the command `rate-show` will also show Rx/Tx rates of the attack on the switch (ports `3/0`, `5/0`, and `6/0`). #### FIX ME!  
 
 **Results:**
-* To verify the maximum attack rate that SMARTCOOKIE can handle before any packet loss, increase the sending attack rate with `set 0 rate X` and `set 1 rate X`, with a maximum `X` of 100. As long as the Rx/Tx rates match in the switch agent, the switch agent is successfully defending against the SYN flood attack packets without any packet loss, up to 135 Mpps. 
-
-## Experiment 2 - Latency (Estimate: 20 human-minutes)
-
-## Experiment 3 - CPU (Estimate: 20 human-minutes)
+* To verify the maximum attack rate that SC-HSH and SC-AES can handle before any packet loss, increase the sending attack rate with `set 0 rate X` and `set 1 rate X`, with a maximum `X` of 100. As long as the Rx/Tx rates match in the switch agent, the switch agent is successfully defending against the SYN flood attack packets without any packet loss. SC-HSH can accomplish this up until rates of 136 Mpps, while SC-AES can only achieve 52 Mpps.
+	* For SC-HSH:
+   	* For SC-AES: 
 
 
+### Experiment 1C and 1D: XDP-HSH and K-SH 
 
-### Benchmarking hash rate
+## 4.2 Experiment 2 - Latency (Estimate: 20 human-minutes)
 
-The AES variant of the Switch Agent will respond to any incoming SYN packet from all non-server ports. To measure maximum hash rate, simply direct your packet generators to generate any TCP packet with TCP flags set to `0x02`, and increase sending rate (observe response packet rate) until loss is observed.
+## 4.3 Experiment 3 - CPU (Estimate: 20 human-minutes)
 
-Note: for AES variant, please first run the controller script to load an arbitrary key; this is required to set up recirculation rounds correctly. 
+
+
+
 
 
 ## Citing
