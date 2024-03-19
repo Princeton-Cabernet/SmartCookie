@@ -16,7 +16,7 @@ IFINDEX=sys.argv[2]
 offload_device = None
 
 DEBUG=False
-if sys.argv[3]=='-d':
+if len(sys.argv)>3 and sys.argv[3]=='-d':
   DEBUG=True
 
 #flags = 0
@@ -42,7 +42,7 @@ b = BPF(text = bpf_src,
 fn = b.load_func("xdp_ingress", mode, offload_device)
 b.attach_xdp(device, fn, flags)
 
-print("XDP INGRESS program is loaded, hit CTRL+C to stop")
+print("XDP INGRESS benchmark program is loaded, hit CTRL+C to stop")
 while 1:
     try:
         time.sleep(1)
