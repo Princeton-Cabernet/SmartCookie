@@ -97,6 +97,8 @@ We next describe the setup and configuration steps to launch SMARTCOOKIE and pre
     an-set 1/3 1    
     port-add 3/0 100G RS     
     port-enb 3/0
+    port-add 4/0 100G RS 
+    port-enb 4/0
     port-add 5/0 40G NONE
     an-set 5/0 2
     port-enb 5/0
@@ -114,7 +116,7 @@ This is the mapping between the servers and switch ports.
 * CLIENT (10G link): Port 1/1 with DPID 129 (hex 0x81) is linked to jc5, with assigned client IP address `129.0.0.5`
 * SERVER (10G link): Port 1/3 with DPID 131 (hex 0x83) is linked to jc6, with assigned server IP address `131.0.0.6` 
 * ATTACK SERVER 1 (100G link): Port 3/0 with DPID 144 (hex 0x90) is linked to `opti1`. 
-* ATTACK SERVER 2 (): 
+* ATTACK SERVER 2 (100G link): Port 4/0 with DPID 152 (hex 0x98) is linked to `opti2`. 
 * ATTACK SERVER 3 (two 40G links): Port 5/0 with DPID 160 (hex 0xA0) is linked to `jc4` port 1 and Port 6/0 with DPID 168 (hex 0xA8) is linked to `jc4` port 0. 
 
 ### 3.2 Launching the Server Agent (Terminal 2, 3, & 4)
@@ -269,18 +271,17 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 * For XDP-HSH, we also need to bring up benchmark defense code on the server: 
 	* SSH into the server with `ssh jc6` and `cd SmartCookie-Artifact/ebpf/benchmark`.
    	* Run `sudo python3 xdp_cookie_load.py enp3s0f1 3` to launch the XDP cookie defense. (The final argument specifies the IFINDEX which is associated with the interface, and can be found with `ip a`.)
-* For both XDP-HSH and K-SH, MEASUREMENT SCRIPTS!~ 
+* For both XDP-HSH and K-SH, load measurement scripts on the `jc6` server that will track its Rx and Tx rates:
+	* Open two new terminals. In each terminal, SSH into the server with `ssh jc6` and `cd SmartCookie-Artifact/experiments/measurements`.
+   	  	* 1) `./rx_pps.sh` to capture a continous Rx packet count  
+	 	* 2) `./tx_pps.sh` to capture a continous Tx packet count  
 
-**Attack Preparation for both Experiment 1C and 1D (same as for 1A and 1B):**
-* In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
-* For each attack terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
-* If the server has been rebooted recently, reconfigure the huge pages: `cd /home/shared/dpdk/usertools` and run `./dpdk-setup.sh`. 
-  	* On `opti1` and `opti2`, we have non-NUMA systems, so choose the option to setup hugepage mappings for non-NUMA systems [5]. Meanwhile, for `jc4`, choose the option for NUMA systems [52].
-  	* Enter 8192 pages per node.
-  	* Exit the script and return to the above steps to launch pktgen. 
+**Attack Preparation for both Experiment 1C and 1D:**
+* In one additional terminal, SSH into JUST the `jc4` attack machine: `ssh jc4` (we only need one attack machine for these benchmarks, as they are easily overwhelmed by lower attack rates). `DPDK` and `pktgen-DPDK` are already configured for you.
+* In the `jc4` terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
 
 **Attack Execution for both Experiment 1C and 1D:** 
-* From within the `Pktgen:/>` console of each of the attack machines, launch the attack against the `jc6` server, using the following commands (**NOTE:** we are generating spoofed UDP packets here, which the `synflood_assist.p4` program on the switch converts to properly formed SYN packets before sending to the server, as generating properly formed SYN packets was less convenient to do directly using `pktgen`).
+* From within the `Pktgen:/>` console, launch the attack against the `jc6` server, using the following commands (**NOTE:** we are generating spoofed UDP packets here, which the `synflood_assist.p4` program on the switch converts to properly formed SYN packets before sending to the server, as generating properly formed SYN packets was less convenient to do directly using `pktgen`).
 * On attack server `opti1`, copy-paste the following comands:
 ```
     	set 0 type ipv4 
