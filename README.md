@@ -176,7 +176,7 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
   	* Enter 8192 pages per node.
   	* Exit the script and return to the above steps to launch pktgen. 
 
-**Execution for both Experiment 1A and 1B:** 
+**Attack Execution for both Experiment 1A and 1B:** 
 * From within the `Pktgen:/>` console of each of the attack machines, launch the SYN flood against the `jc6` server, using the following commands (which set the SYN flag 0x02 with a random mask, and spoof source IPs).
 * On attack server `opti1`, copy-paste the following comands:
    	```
@@ -269,7 +269,7 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 * For XDP-HSH, we also need to bring up benchmark defense code on the server: 
 	* SSH into the server with `ssh jc6` and `cd SmartCookie-Artifact/ebpf/benchmark`.
    	* Run `sudo python3 xdp_cookie_load.py enp3s0f1 3` to launch the XDP cookie defense. (The final argument specifies the IFINDEX which is associated with the interface, and can be found with `ip a`.)
-* For both XDP-HSH and K-SH, MEASUREMENT 
+* For both XDP-HSH and K-SH, MEASUREMENT SCRIPTS!~ 
 
 **Attack Preparation for both Experiment 1C and 1D (same as for 1A and 1B):**
 * In three additional terminals, SSH into the attack machines: `ssh opti1`, `ssh opti2`, and `ssh jc4`. `DPDK` and `pktgen-DPDK` are already configured for you.
@@ -279,11 +279,11 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
   	* Enter 8192 pages per node.
   	* Exit the script and return to the above steps to launch pktgen. 
 
-**Execution for both Experiment 1C and 1D:** 
+**Attack Execution for both Experiment 1C and 1D:** 
 * From within the `Pktgen:/>` console of each of the attack machines, launch the attack against the `jc6` server, using the following commands (**NOTE:** we are generating spoofed UDP packets here, which the `synflood_assist.p4` program on the switch converts to properly formed SYN packets before sending to the server, as generating properly formed SYN packets was less convenient to do directly using `pktgen`).
 * On attack server `opti1`, copy-paste the following comands:
-   	```
-    	set 0 type ipv4
+```
+    	set 0 type ipv4 
 	set 0 count 0
 	set 0 burst 10000
 	set 0 rate 0.01
@@ -296,10 +296,10 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
 	range 0 dst port 8090 8090 8090 0
 	start 0
-	```
+```
 * On attack server `opti2`, copy-paste the following comands:
-   	```
-    	set 0 type ipv4
+```
+  	set 0 type ipv4
 	set 0 count 0
 	set 0 burst 10000
 	set 0 rate 0.01
@@ -312,10 +312,10 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
 	range 0 dst port 8090 8090 8090 0
 	start 0
-	```
+```
 * On attack server `jc4`, copy-paste the following comands: 
-   	```
-    	set 0 type ipv4
+```
+  	set 0 type ipv4
 	set 0 count 0
 	set 0 burst 10000
 	set 0 rate 0.01
@@ -328,8 +328,8 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 	range 0 dst ip 131.0.0.6 131.0.0.6 131.0.0.6 0.0.0.0 
 	range 0 dst port 8090 8090 8090 0
 	start 0
-	
-      	set 1 type ipv4
+
+	set 1 type ipv4
 	set 1 count 0
 	set 1 burst 10000
 	set 1 rate 0.01
@@ -345,7 +345,7 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 	
 	start 0
 	start 1   
-	```
+```
 * The commands `start 0` and `start 1` begin the attack, and you should see `pktgen`'s continuous Rx/Tx rates in the `Pktgen:/>` consoles. (Note: If the console displays ever get messy, `page main` will reset the display.)
 * In the switch agent's `bf-sde.pm>` console, the command `rate-show` will also show Rx/Tx rates of the attack on the switch (ports `3/0`, `5/0`, and `6/0`). #### FIX ME!  
 
