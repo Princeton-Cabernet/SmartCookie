@@ -305,39 +305,38 @@ control SwitchIngress(
 
 
         apply {
-            	//for debugging with jc5 (dpid 128) and jc6 (dpid 130) 
- 		
-/*		if(ig_intr_md.ingress_port==130){
-			route_to(128);
-		}
-		else{
-			route_to(130); 
-	    		//jc6 
-            		hdr.ethernet.dst_addr=0x000000000082;
-		}		
-*/		ig_md.redo_cksum = 0; 
 
-            	//for testing with jc4 (dpid 136) and jc5 (dpid 128) and jc6 (dpid 130) 
+            	//for testing with jc4 (dpid 160 and 168), jc5 (dpid 129), jc6 (dpid 131), opti1 (dpid 144), and opti2 (dpid 152)  
 		//dst ip based routing 
 
-		//dst jc5 port 0, ip 128.0.0.5
-		if(hdr.ipv4.dst_addr == 0x80000005){
-			route_to(128); 
-	    		hdr.ethernet.dst_addr=0x000000000080;
+		//dst jc4 port 0, ip 168.0.0.4
+		if(hdr.ipv4.dst_addr == 0xA8000004){
+			route_to(168); 
+	    		hdr.ethernet.dst_addr=0x0000000000A8;
 		}
-		//dst jc5 port 1, ip 129.0.0.5
+		//dst jc4 port 1, ip 160.0.0.4
+		else if(hdr.ipv4.dst_addr == 0xA0000004){
+			route_to(160); 
+	    		hdr.ethernet.dst_addr=0x0000000000A0;
+		}
+		//dst jc5, ip 129.0.0.5
 		else if(hdr.ipv4.dst_addr == 0x81000005){
 			route_to(129); 
 	    		hdr.ethernet.dst_addr=0x000000000081;
 		}
-		//dst jc6, ip 130.0.0.6
-		else if(hdr.ipv4.dst_addr == 0x82000006){
-			route_to(130); 
-	    		hdr.ethernet.dst_addr=0x000000000082;
+		//dst jc6, ip 131.0.0.6
+		else if(hdr.ipv4.dst_addr == 0x83000006){
+			route_to(131); 
+	    		hdr.ethernet.dst_addr=0x000000000083;
 		}
-		else{ //dst jc4 
-			route_to(136);
-            		hdr.ethernet.dst_addr=0x000000000088;
+		//dst opti1, ip 144.0.0.7
+		else if(hdr.ipv4.dst_addr == 0x90000007){
+			route_to(144); 
+	    		hdr.ethernet.dst_addr=0x000000000090;
+		}
+		else{ //dst opti2
+			route_to(152);
+            		hdr.ethernet.dst_addr=0x000000000098;
 		}
 
 		if(hdr.udp.isValid()){
