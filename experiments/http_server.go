@@ -27,6 +27,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+    fmt.Println("Launching server and listening for connection requests...")
     runtime.GOMAXPROCS(38)
     http.HandleFunc("/", hello)
     http.ListenAndServe(":8090", nil)
