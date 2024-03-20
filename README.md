@@ -147,7 +147,7 @@ There are three main experiments that showcase the key results and major claims 
 * C2: During attacks, SMARTCOOKIE protects benign clients from performance penalties and protects servers from additional CPU usage. It adds little to no latency overhead to benign connections during attacks, and any latency is comparable to the baseline latency with no ongoing attack. Additionally, it protects the server's CPU during attacks, fully keeping the CPU resources for other applications. This is proven by experiments (E2) and (E3), and shown in Section 8.3 and 8.4 of the paper.
 
 ## 4.1 Experiment 1 - Hashing Throughput (Estimate: 1 human-hour)
-**Description:** Compare the maximum hashing throughput SMARTCOOKIE-HalfSipHash (SC-HSH) can achieve _without packet loss_ to the maximum hashing throughput of the three benchmarks: 
+**Description:** Compare the hashing throughput SMARTCOOKIE-HalfSipHash (SC-HSH) can achieve _without packet loss_ to the maximum hashing throughput of the three benchmarks: 
 * SMARTCOOKIE-AES (SC-AES)
 * XDP-HalfSipHash (XDP-HSH)
 * Kernel-SipHash (K-SH)
@@ -314,10 +314,11 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 
 
 
-## 4.2 Experiment 2 - Latency (Estimate: 20 human-minutes)
+## 4.2 Experiment 2 - Latency Overhead (Estimate: 30 human-minutes)
+**Description:** Measure the end-to-end setup latency for benign client connections during an attack, to show that SMARTCOOKIE adds _little to no latency overhead_ to the baseline without any attack. 
 
-## 4.3 Experiment 3 - CPU (Estimate: 20 human-minutes)
-
+## 4.3 Experiment 3 - Server CPU Usage (Estimate: 30 human-minutes)
+**Description:** Measure the CPU usage on the server during an attack, to show that SMARTCOOKIE fully protects server CPU usage during attack. 
 
 
 
