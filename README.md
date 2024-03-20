@@ -207,9 +207,9 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 	set 0 rnd 0 46 ........00000010................
 	set 0 proto tcp
 	set 0 size 40 
-	set 0 src mac 00:00:00:00:00:90
+	set 0 src mac 00:00:00:00:00:98
 	set 0 dst mac 00:00:00:00:00:83 
-	set 0 src ip 144.0.0.7/32 
+	set 0 src ip 152.0.0.8/32 
 	set 0 dst ip 131.0.0.6
 	set 0 dport 8090 
 	start 0
