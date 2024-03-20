@@ -1,9 +1,6 @@
 #!/bin/bash
 
 time="1"        # one second
-#cabernet 
-#int="enp134s0f1np1"   # network interface
-#lucid 
 int="enp3s0f1"
 while true
     do
