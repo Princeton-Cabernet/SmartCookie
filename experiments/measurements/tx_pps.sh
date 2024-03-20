@@ -1,7 +1,7 @@
 #!/bin/bash
 
 time="1" 	# one second
-int="enp3s01"   # network interface
+int="enp3s0f1"   # network interface
 
 while true
     do
