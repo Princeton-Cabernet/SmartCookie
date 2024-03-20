@@ -47,7 +47,7 @@ There are no security, privacy, or ethical concerns or risks to evaluators or th
         IdentityFile ~/.ssh/usenixsec24ae.priv.id_rsa
         ProxyJump jc-gateway
     Host opti2        # Attack server 2 
-        HostName 10.0.0.7             
+        HostName 10.0.0.8             
         User usenixsec24ae
         IdentityFile ~/.ssh/usenixsec24ae.priv.id_rsa
         ProxyJump jc-gateway
