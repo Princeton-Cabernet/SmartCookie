@@ -143,7 +143,7 @@ There are three main experiments that showcase the key results and major claims 
 
 ## 4.0 Major Claims 
 
-* C1: SMARTCOOKIE defends against attacks _without packet loss_ until rates of 136.9Mpps (which is 2.6x more than the next fastest defense). This is proven by experiment (E1), and described in Section 8.2 of the paper.
+* C1: SMARTCOOKIE defends against attacks _without packet loss_ until high rates (up to 136 Mpps), significantly outperforming the benchmarks of other defenses, which become exhausted at attack rates starting at only ~1.3 Mpps up to ~52 Mpps. This is proven by experiment (E1), and described in Section 8.2 of the paper.
 * C2: During attacks, SMARTCOOKIE protects benign clients from performance penalties and protects servers from additional CPU usage. It adds little to no latency overhead to benign connections during attacks, and any latency is comparable to the baseline latency with no ongoing attack. Additionally, it protects the server's CPU during attacks, fully keeping the CPU resources for other applications. This is proven by experiments (E2) and (E3), and shown in Section 8.3 and 8.4 of the paper.
 
 ## 4.1 Experiment 1 - Hashing Throughput (Estimate: 45 human-minutes)
