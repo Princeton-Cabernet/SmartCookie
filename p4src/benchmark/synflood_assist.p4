@@ -324,19 +324,19 @@ control SwitchIngress(
 			route_to(129); 
 	    		hdr.ethernet.dst_addr=0x000000000081;
 		}
-		//dst jc6, ip 131.0.0.6
-		else if(hdr.ipv4.dst_addr == 0x83000006){
-			route_to(131); 
-	    		hdr.ethernet.dst_addr=0x000000000083;
-		}
 		//dst opti1, ip 144.0.0.7
 		else if(hdr.ipv4.dst_addr == 0x90000007){
 			route_to(144); 
 	    		hdr.ethernet.dst_addr=0x000000000090;
 		}
-		else{ //dst opti2
+		else if(hdr.ipv4.dst_addr == 0x98000008){ //dst opti2
 			route_to(152);
             		hdr.ethernet.dst_addr=0x000000000098;
+		}
+		//dst jc6, ip 131.0.0.6
+		else{
+			route_to(131); 
+	    		hdr.ethernet.dst_addr=0x000000000083;
 		}
 
 		if(hdr.udp.isValid()){
