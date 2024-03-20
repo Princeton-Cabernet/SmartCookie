@@ -314,14 +314,52 @@ Each of the defense benchmarks have slightly different setup and attack steps, w
 
 
 
-## 4.2 Experiment 2 - Latency Overhead (Estimate: 30 human-minutes)
-**Description:** Measure the end-to-end setup latency for benign client connections during an attack, to show that SMARTCOOKIE adds _little to no latency overhead_ to the baseline without any attack. 
+## 4.2 Experiment 2 - Latency Overhead (Estimate: 1 human-hour)
+**Description:** Measure the end-to-end setup latency for benign client connections during an attack, to show that SMARTCOOKIE adds _little to no latency overhead_ compared to the baseline without any attack. 
 
-## 4.3 Experiment 3 - Server CPU Usage (Estimate: 30 human-minutes)
-**Description:** Measure the CPU usage on the server during an attack, to show that SMARTCOOKIE fully protects server CPU usage during attack. 
+### 4.2.1 Preparation for Experiment 2 
+* Bring up the SMARTCOOKIE switch agent and server agent as described `3.1` and `3.2` of this README. * Start up an HTTP server on port `8090` on the `jc6` server with `go run experiments/http_server.go`.
+* In one additional terminal, SSH into the `opti1` attack machine: `ssh opti1` (_we only need one attack machine for these benchmarks, as they are easily overwhelmed by lower attack rates_). `DPDK` and `pktgen-DPDK` are already configured for you.
+	* In the `opti1` terminal, `cd /home/shared/pktgen-dpdk` and launch pktgen with `sudo -E tools/run.py testbed`.
 
+### 4.2.2 Execution for Experiment 2 
+* From within the `Pktgen:/>` console of `opti1`, launch the SYN flood against the `jc6` server, using the following commands (which set the SYN flag 0x02 with a random mask, and spoof source IPs):
+```
+	set 0 type ipv4
+	set 0 count 0
+	set 0 burst 10000
+	set 0 rate 1
+	enable 0 random 
+	set 0 rnd 0 46 ........00000010................
+	set 0 proto tcp
+	set 0 size 40 
+	set 0 src mac 00:00:00:00:00:90
+	set 0 dst mac 00:00:00:00:00:83 
+	set 0 src ip 144.0.0.7/32 
+	set 0 dst ip 131.0.0.6
+	set 0 dport 8090 
+	start 0
+```
+  
+### 4.2.3 Results for Experiment 2 
+* On the `jc5` client machine, measure the connection latency across multiple clients by running the script `./experiments/measurements/collect_latency.sh <attack\_rps> <local\_port>`, specifying the current attack rate and desired local source port. The latency collection script will print out connection latency.
+* As describd in `4.1`, play with different attack rates (using `set 0 rate X` on `opti1`), and verify with the latency measurement script what the end-to-end connection latencies are under different attacks. Figure 6 in the paper presents results up until attack rates of ~35 Mpps, and you should see that the latency remains effectively the same throughout (note that this will be the case for SMARTCOOKIE up until ~135 Mpps). 
+* Finally, you can turn off the attack and verify what the average end-to-end connection latency is for the baseline without the attack, and compare it to the latency during an attack, which should be relatively close. 
 
+## 4.3 Experiment 3 - Server CPU Usage (Estimate: 1 human-hour)
+**Description:** Measure the CPU usage on the server during an attack, to show that SMARTCOOKIE fully protects server CPU usage during attacks. 
 
+### 4.3.1 Preparation for Experiment 3
+The preparation for E3 is identical to that of E2 (`4.2.2`). 
+
+### 4.3.2 Execution for Experiment 3
+The execution for E3 is identical to that of E2 (`4.2.2`). 
+
+### 4.3.3 Results for Experiment 3
+* The simplest way to verify and visualize the CPU usage is with `htop` on the `jc6` server machine. You can keep a terminal open to continually track CPU usage during the experiment.
+* The more robust way of measuring the CPU usage is to run the script `./experiments/measurements/collect_cpu_instr.sh <attack_rps>`, while specifying the current attack rate and where the collected data should be stored.
+* As describd in `4.1`, play with different attack rates (using `set 0 rate X` on `opti1`), and verify with `htop` and the CPU measurement script what the usage rates are under different attacks. Figure 7 in the paper presents results up until attack rates of ~35 Mpps, and you should see that the CPU usage remains almost non-existent throughout (note that this will be the case for SMARTCOOKIE up until ~135 Mpps).  
+* Finally, you can turn off the attack and verify what the CPU usage is for the baseline without the attack, and it should directly match the CPU usage during an attack (effectively none). 
 
 
 ## Citing
