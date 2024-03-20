@@ -17,8 +17,11 @@ sudo arp -s $GATEWAY $ARP_ADDRESS
 
 # Add route entries
 sudo route add -net 129.0.0.0/8 gw $GATEWAY dev $INTERFACE
-sudo route add -net 136.0.0.0/8 gw $GATEWAY dev $INTERFACE
 sudo route add -net 131.0.0.0/8 gw $GATEWAY dev $INTERFACE
+sudo route add -net 144.0.0.0/8 gw $GATEWAY dev $INTERFACE
+sudo route add -net 152.0.0.0/8 gw $GATEWAY dev $INTERFACE
+sudo route add -net 160.0.0.0/8 gw $GATEWAY dev $INTERFACE
+sudo route add -net 168.0.0.0/8 gw $GATEWAY dev $INTERFACE
 
 # Turn off TX and RX checksum offloading
 sudo ethtool -K $INTERFACE tx off rx off
