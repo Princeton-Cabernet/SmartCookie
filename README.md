@@ -359,7 +359,7 @@ The execution for E3 is identical to that of E2 (`4.2.2`).
 * The simplest way to verify and visualize the CPU usage is with `htop` on the `jc6` server machine. You can keep a terminal open to continually track CPU usage during the experiment.
 * The more robust way of measuring the CPU usage is to run the script `./experiments/measurements/collect_cpu_instr.sh <attack_rps>`, while specifying the current attack rate and where the collected data should be stored.
 * As describd in `4.1`, play with different attack rates (using `set 0 rate X` on `opti1`), and verify with `htop` and the CPU measurement script what the usage rates are under different attacks. Figure 7 in the paper presents results up until attack rates of ~35 Mpps, and you should see that the CPU usage remains almost non-existent throughout (note that this will be the case for SMARTCOOKIE up until ~135 Mpps).  
-* Finally, you can turn off the attack and verify what the CPU usage is for the baseline without the attack, and it should directly match the CPU usage during an attack (effectively none). 
+* Finally, you can turn off the attack and verify what the CPU usage is for the baseline without the attack, and it should directly match the CPU usage during an attack (effectively none), demonstrating that SMARTCOOKIE fully protects the server from CPU usage during attacks. 
 
 
 ## Citing
