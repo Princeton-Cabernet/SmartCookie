@@ -1,6 +1,6 @@
 # SmartCookie Artifact 
 
-This repository contains the prototype source code and instructions for artifact evaluation for our USENIX Security'24 paper [SMARTCOOKIE: Blocking Large-Scale SYN Floods with a Split-Proxy Defense on Programmable Data Planes](#).
+This repository contains the prototype source code and instructions for artifact evaluation for our USENIX Security'24 paper [SMARTCOOKIE: Blocking Large-Scale SYN Floods with a Split-Proxy Defense on Programmable Data Planes](https://www.usenix.org/conference/usenixsecurity24/presentation/yoo).
 
 ## 1. Contents
 The artifact consists of two major pieces: 1) source code for the switch agent and server agent of SMARTCOOKIE's split-proxy SYN-flooding defense, related benchmark code, and measurement scripts (showing availability), and 2) a hardware testbed for running and evaluating SMARTCOOKIE under key attack scenarios (showing functionality and reproducibility). 
