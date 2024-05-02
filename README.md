@@ -122,7 +122,7 @@ This is the mapping between the servers and switch ports.
 ### 3.2 Launching the Server Agent (Terminal 2, 3, & 4)
 * Open three other terminal windows and access the server agent with `ssh jc6` in each window.
 * Clone the artifact repo on `jc6` if you haven't already, and `cd SmartCookie-Artifact/ebpf`.
-* Run `./configure/configure_jc6.sh` once to configure static IP addresses and ARP entries.
+* Run `./configure/configure_server.sh` once to configure static IP addresses and ARP entries.
 * Next, use the provided python scripts in the separate terminals to compile and load the eBPF programs to the interface connected to the switch:
 	* 1) `sudo python3 xdp_load.py enp3s0f1` for ingress 
 	* 2) `sudo python3 tc_load.py enp3s0f1` for egress 
